@@ -89,7 +89,3 @@ class Wonky(object):
         df = df.loc[x.index, :]
         
         return df
-    
-    
-    
-w = wonky()
