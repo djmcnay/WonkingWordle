@@ -36,6 +36,10 @@ class Wonky(object):
         self.solved = {}     # dict of form {1:'A', 5:'X'} where No are posns 
         self.known = []      # list of letters
         
+        # Guess Matrix
+        # Only really used for the App to store old guesses with colours
+        self.guess_matrix = []
+        
         return
     
     def _set_corpus_to_df(self, word_series):
@@ -47,29 +51,31 @@ class Wonky(object):
         df = pd.DataFrame(df, columns=range(1, 6))
         
         return df
-    
-    def update_exclude(self):
-        """ """
-        return
-    
-    def update_solved(self):
-        """ """
-        return
-    
+        
     def update_known(self):
-        """ """
+        """ Cleans Known List by Removing Solved Letters """
+        
+        self.known = list(set(self.known))
+        
+        for l in self.solved.values():
+            if l in self.known:
+                self.known.remove(l)
+        
         return
 
     def guess_list(self):
         """ Filters Corpus Based on Rules """
         
-        # convert corpus to df where each letter is a col
-        # by iterating over each entry and split to chars
-        # df now becomes our primary dataframe
-        df = []
-        for word in self.corpus:
-            df.append([i for i in word])
-        df = pd.DataFrame(df, columns=range(1, 6))
+        # # convert corpus to df where each letter is a col
+        # # by iterating over each entry and split to chars
+        # # df now becomes our primary dataframe
+        # df = []
+        # for word in self.corpus:
+        #     # just on the off chance a non-string has slipped in
+        #     if isinstance(word, str):
+        #         df.append([i for i in word])
+        # df = pd.DataFrame(df, columns=range(1, 6))
+        df = self.corpus.copy()
         
         # filter out words whre we know letters to exclude
         if len(self.exclude) > 0:
