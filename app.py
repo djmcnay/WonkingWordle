@@ -135,19 +135,8 @@ def card_guess_matrix(wonky, width_px=75):
                                 'width':width_px, 'height':width_px,
                                 'background-color':colour,})
     
-    rows = []
-    
-    if len(wonky.guess_matrix) == 0:
-        return dbc.Row(rows)
-    else:
-        # each g is a guess (with 5 sub-bits)
-        for g in wonky.guess_matrix:
-            row = []
-            for tile in g:
-                row.append(_tile(g[1], g[2]))
-            rows.append(dbc.Row(row))
-                    
-    return dbc.Col(rows)
+    return "THIS ISN'T WORKING"
+
 
 
 @app.callback(output={'words':Output('div-word-list', 'children'),
@@ -179,7 +168,6 @@ def callback_guess(n_clicks, reset,
  
     # iterate through each result & update wonky accordingly
     # either a HIT, MISS or NEAR
-    guess_store = []
     for i, v in enumerate(results):
         
         g = str(guesses[i]).upper()
@@ -188,22 +176,18 @@ def callback_guess(n_clicks, reset,
             # solved is a dict with keys == solved number
             # so bring in the index (+1) and the letter
             wonky.solved[i+1] = g
-            guess_store.append((i+1, g, 'seagreen'))
+            wonky.guess_matrix.append((g, 'seagreen'))
         
         elif v == 'MISS':
             # now know to exlude this letter
             wonky.exclude.append(g)
-            guess_store.append((i+1, g, 'sienna'))
+            wonky.guess_matrix.append((g, 'sienna'))
         
         else:
             # now know letter is in the word, just wrong location
             wonky.known.append(g)
-            guess_store.append((i+1, g, 'seashell'))
-    
-    # append this result to guess matrix in wonky
-    # means we can build the guess card
-    wonky.guess_matrix.append(guess_store)
-        
+            wonky.guess_matrix.append((g, 'seashell'))
+            
     # Need to do some tidying up
     # Guess engine will get upset if a solved letter is still in known
     # we also want to remove duplicates
@@ -219,14 +203,13 @@ def callback_guess(n_clicks, reset,
             'words':words, 
             'excluded':wonky.exclude,
             'known':wonky.known,
-            'old-guesses':card_guess_matrix(wonky),
+            'old-guesses': card_guess_matrix(wonky),
             }
 
 # %% RUN DASH APP
 
 # app.title='Wonking Wordle'
 app.layout=layout
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
