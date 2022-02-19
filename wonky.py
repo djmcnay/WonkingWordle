@@ -73,7 +73,7 @@ class Wonky(object):
         try:
             guess = [guess] if isinstance(guess, str) else guess
             guess = [char for char in guess[0]] if len(guess) == 1 else guess
-            guess = [guess[i].upper() for i in range(wonky.n)]
+            guess = [guess[i].upper() for i in range(self.n)]
         except:
             raise "Error: Guess input doesn't appear to be a 5 letter word"
             
