@@ -29,10 +29,12 @@ app = dash.Dash(__name__,
 
 layout = html.Div([
     
+    html.H1("Wonking Wordle"),
+    
+    
+    
 
 ], className='container')
-
-
 
 # %% RUN DASH APP
 
