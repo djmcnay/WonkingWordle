@@ -26,14 +26,16 @@ app = dash.Dash(__name__,
                 )
 
 
-COLOURS = {'green':'seafoam',
-           'orange':'sienna',
-           'red':'red',
+COLOURS = {'green':'teal',
+           'amber':'purple',
+           'red':'#ed1153',    # some pinky colour I found
+           'theme':'#ed1153',
+           'tile':'lightgrey',
            }
 
 # %%
 
-def card_refresh(wonky, width_px=75):
+def card_refresh(wonky, width_px=70):
     """ MAIN GUESS INPUT CARD & RESULTS """
     
     def _input_letter(idx=1):
@@ -43,11 +45,11 @@ def card_refresh(wonky, width_px=75):
         if idx in wonky.solved.keys():
             disabled=True
             letter_value=str(wonky.solved[idx]).upper()
-            bg_colour='green',
+            bg_colour=COLOURS['green'],
         else:
             disabled=False
             letter_value=""
-            bg_colour='white'
+            bg_colour=COLOURS['tile']
         
         # DBC Input Box
         letter = dbc.Input(
@@ -57,7 +59,7 @@ def card_refresh(wonky, width_px=75):
             maxlength=1,
             disabled=disabled,
             style={'text-align':'center',
-                   'font-size':30, 'font-weight':'bold',
+                   'font-size':35, 'font-weight':'bold',
                    'width':width_px, 'height':width_px,
                    'background-color':bg_colour,}
             )
@@ -84,7 +86,8 @@ def card_refresh(wonky, width_px=75):
             style={'text-align':'left',
                    'font-size':12,
                    'width':width_px,
-                   'margin-top':'10px'}
+                   'margin-top':'10px',
+                   'background-color':COLOURS['tile']}
             )
         
         return dbc.Col(result)
@@ -96,26 +99,82 @@ def card_refresh(wonky, width_px=75):
     return dbc.Col([row_guesses, row_results], id='card-interface')
 
 
+def card_of_failure(wonky, width_px=50):
+    """ """
+    
+    #text = str(wonky.guess_matrix)
+    children = []
+    
+    # template for a scrabble tile thing for the each letter
+    def _tile(letter, colour):
+        return dbc.Input(value="{}".format(letter),
+                         type='text',
+                         disabled=True,
+                         style={'width':width_px, 'height':width_px,
+                                'text-align':'center',
+                                'font-size':18, 
+                                'font-weight':'bold',
+                                'color':'lightgrey',
+                                'background-color':colour,
+                                },)
+    
+    # guess matrix is a dictionary, which starts empty
+    # every time there is a guess we add a key, which is also a dict
+    # which in turn stores lists of the guess letters & the results
+    # only proceed if there is at least one stored guess
+    if len(wonky.guess_matrix.keys()) > 0:
+        
+        # now iterate over historical guess words 
+        for k, v in wonky.guess_matrix.items():
+             
+            # unpack dictionary into lists of guess letters & results
+            guess, result = v['guess'], v['result']
+            
+            # set up a blank list to append tiles too for this row (guess)
+            # then iterate over letters in the word appending tiles to the row
+            row = []
+            for i, letter in enumerate(guess):
+                
+                # determine tile colour based on the result
+                if result[i] == "HIT":
+                    colour = COLOURS['green']
+                elif result[i] == "MISS":
+                    colour = COLOURS['red']
+                elif result[i] == "NEAR":
+                    colour = COLOURS['amber']
+                
+                # build tile and append to this row
+                row.append(_tile(letter, colour))
+            
+            # now append whole row (so one 5 letter word guess with 5 tiles)
+            # to the childrens list
+            children.append(dbc.Row(row))
+    
+    
+    return dbc.Col(children)
+
 # %% LAYOUT
 
 layout = html.Div([
-    
-    dbc.Row([
-        dbc.Col([html.H2("Wonking Wordle"),], width=11),
-        dbc.Col([
-            dcc.Location(id='url', refresh=True),
-            dbc.Button("⟳", 
-                       id='button-reload', 
-                       style={'font-size':32,
-                      'height':'35px','width':'35px',
-                      'display': 'inline-flex',
-                      'align-items': 'center', 
-                      'border-radius':'50%',},
-               ),
-        ], width=1),
-    ], className="d-flex align-items-center",),
-    
+
     dbc.Card([
+        
+        # Title & Refresh Button
+        dbc.Row([
+            dbc.Col([html.H2("Wonking Wordle"),], width=10),
+            dbc.Col([
+                dcc.Location(id='url', refresh=True),
+                dbc.Button("⟳", 
+                           id='button-reload', 
+                           style={'font-size':38,
+                                  'height':'40px','width':'40px',
+                                  'display': 'inline-flex',
+                                  'align-items': 'center', 
+                                  'border-radius':'50%',
+                                  'background-color':COLOURS['theme']},
+                   ),
+            ], width=2),
+        ], className="d-flex align-items-center",),
         
         #dbc.Card([card_refresh(wonky)], id='card-interface'),    # use func to build guess & results grid
         card_refresh(wonky),
@@ -125,11 +184,15 @@ layout = html.Div([
             
             dbc.Col([
                 dbc.InputGroup([
-                    dbc.InputGroupText("Pick-a-Punt:"),  
-                    dcc.Dropdown(id='dd-top-punts', style={'width':'125px'}),
+                    dbc.InputGroupText("Pick-a-Punt:", 
+                                       style={'margin-right':'5px',
+                                              'font-size':'18px',
+                                              'color':COLOURS['theme']}),  
+                    dcc.Dropdown(id='dd-top-punts', 
+                                 style={'width':'125px',
+                                        'background-color':COLOURS['tile']}),
                 ], className='m-3'),
             ], width=8),
-            
             
             # Update Model Button
             dbc.Col([
@@ -137,25 +200,35 @@ layout = html.Div([
                            id='button-update', 
                            n_clicks=0,
                            style={'width':'100%', 
-                                  #'height':'80%',
+                                  #'margin-top':'8px',
+                                  'background-color':COLOURS['theme'],
                                   }),
             ], width={'offset':0, 'size':4}),
-        ], className='m-2'),
+        ], className='m-2 d-flex align-items-center'),
         
         dbc.Row([
             dbc.Col([
                 html.H5("Top Punts: "),
-                html.Div(id='div-word-list', style={'margin-left':'25px'})
-            ], width=4),
+                dbc.Card(id='div-word-list', 
+                         body=True,
+                         style={'text-align':'center',
+                                'opacity':0.8})
+            ], width=3),
             
             dbc.Col([
                 html.H5("Failure Reminders: "),
-                #dbc.Row(card_old_guesses(wonky), id='old-guesses'),
-            ], width=8),
+                dbc.Card([card_of_failure(wonky)], 
+                         id='card-failure', 
+                         style={'display': 'inline-flex',
+                                'align-items': 'right', 
+                                'border': 'none',
+                                }),
+            ], width={'offset':2, 'size':7}, ),
             
         ]),
     
-    ], body=True)
+    ], body=True, style={'background-color':'rgba(0,0,0,0.84)',
+                         'border':'none'})
     
 
 ], className='container')
@@ -177,9 +250,9 @@ def reload_data(_):
                       'top_punt':Output('dd-top-punts', 'value'),
                       'top_punts':Output('dd-top-punts', 'options'),
                       'card-guess':Output('card-interface', 'children'),
+                      'failure':Output('card-failure', 'children'),
                       #'excluded':Output('div-excluded', 'children'),
                       #'known':Output('div-known', 'children'),
-                      #'old-guesses':Output('old-guesses', 'children'),
                       },
               inputs={'n_clicks':Input('button-update', 'n_clicks'),
                       'guesses':(State('input-1', 'value'),
@@ -197,12 +270,13 @@ def callback_guess(n_clicks,
                    guesses, results,):
     
     # wonky has a function to update itself when you have a word & results
-    wonky.guess_update(guesses, results)
+    if n_clicks >0:
+        wonky.guess_update(guesses, results)
     
     # Run Guess Update
     # Produce list of best words
     df = wonky.guess_list()
-    words = [html.P("".join(df.loc[i,:])) for i in df.index[0:10]]
+    words = [html.P("".join(df.loc[i,:])) for i in df.index[0:8]]
     
     # Update Dropdown list of Top Punts
     # wonky.guess_list() creates a list of words in wonky.top_guess
@@ -213,6 +287,7 @@ def callback_guess(n_clicks,
             'top_punts':top_punts,
             'top_punt':top_punt,
             'card-guess':card_refresh(wonky),
+            'failure':card_of_failure(wonky),
             }
 
 
