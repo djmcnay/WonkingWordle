@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 17 18:06:33 2022
+App Developed on Tuesday 17th Feb to Solve these annoying Wordle things
 
-@author: T333208
+@author: David J McNay
 """
 
 # %% IMPORTS
@@ -79,6 +79,52 @@ def card_refresh(wonky, width_px=70):
     return card
 
 
+def card_old_guesses(wonky, width_px=50):
+    """ Set Up Matrix Ready to Store Old Guesses """
+    
+    def _tile(letter):
+        return dbc.Input(value="{}".format(letter),
+                         disabled=True,
+                         style={'width':width_px, 'height':width_px,
+                                'text-align':'center',
+                                'font-size':20, 'font-weight':'bold',
+                                'bg-color':'lightgrey'})
+    
+    matrix = []
+    n_guess = len(wonky.guess_matrix)
+    
+    if n_guess > 0:
+        
+        for r in range(n_guess):
+            
+            zippy = wonky.guess_matrix[r]
+            
+            row = []    # setup new row list
+            
+            for i, c in enumerate(zippy):
+                letter = zippy[0]
+                row.append(_tile(letter))
+              
+            # append row of tiles to matrix
+            matrix.append(dbc.Row(row))
+            
+    else:
+        
+        # for r in range(1, 2):
+        #     row = []    # setup new row list
+        #     # iterate over row adding columns of tiles
+        #     for c in range(1, 6):
+        #         row.append(_tile(r, c))
+        #     # append row of tiles to matrix
+        #     matrix.append(dbc.Row(row))
+                
+        return matrix
+
+
+
+
+
+
 # %% LAYOUT
 
 layout = html.Div([
@@ -91,9 +137,22 @@ layout = html.Div([
         
         dbc.Row([
             dbc.Col([
-                dbc.Button("Update Guess", id='button-update'),
+                dbc.Button("Update Guess", id='button-update', n_clicks=0),
                 dbc.Button("Reset", id='button-reset'),
             ], width={'offset':10, 'size':2})
+        ]),
+        
+        
+        dbc.Row([
+            dbc.Col([
+                html.H5("Best Guesses: "),
+                html.Div(id='div-word-list', style={'margin-left':'25px'})
+            ], width=2),
+            
+            dbc.Col([
+                dbc.Row(card_old_guesses(wonky), id='old-guesses'),
+            ], width=3),
+            
         ]),
         
         # Row showing the known letters & the excluded letters
@@ -108,14 +167,6 @@ layout = html.Div([
                 html.Div(id='div-known', style={'font-size':20}),    
             ], width=6)
         ]),
-        
-        # Best Guesses from Corpus
-        dbc.Row([
-            html.H5("Best Guesses: "),
-            html.Div(id='div-word-list', style={'margin-left':'25px'})
-        ]),
-        
-        dbc.Card(id='old-guesses'),
 
     ], body=True)
     
@@ -123,49 +174,68 @@ layout = html.Div([
 
 # %% CALLBACKS
 
-def card_guess_matrix(wonky, width_px=75):
-    """ """
+# def child_guess_matrix(children, n, guess, results):
+#     """ 
     
-    def _tile(letter, colour):
-        return dbc.Input(value=letter,        
-                         type='text',        
-                         disabled=True,
-                         style={'text-align':'center',
-                                'font-size':30, 'font-weight':'bold',
-                                'width':width_px, 'height':width_px,
-                                'background-color':colour,})
+#     THIS IS REALLT FIDDLEY
     
-    return "THIS ISN'T WORKING"
+#     The Guess Matrix is 
+    
+    
+#     """
+    
+#     if n == 0:
+#         #children[n-1]['props']['children'][1]['props']['value'] = "A"
+        
+#         #return str(children[n]['props']['children'][0]['props'])
+#         return children
+#     else:
+        
 
-
+#         zippy = list(zip(guess, results))    
+        
+#         # itserate over each column of guesses and update stuff
+#         # n should start at 1 and it the row we are smashing
+#         for i, v in enumerate(guess):
+            
+#             children[n-1]['props']['children'][i]['props']['value'] = v
+            
+#             # if results[i] == "HIT":
+#             #     colour = 'seagreen'
+#             # elif results[i] == "NEAR":
+#             #     colour = 'orange'
+#             # else:
+#             #     colour = 'red'
+            
+            
+#             #children[n-1]['props']['children'][i]['props']['style']['bg-color'] = 'blue'  
+        
+#         return children
+    
 
 @app.callback(output={'words':Output('div-word-list', 'children'),
                       'excluded':Output('div-excluded', 'children'),
                       'known':Output('div-known', 'children'),
                       'card-guess':Output('card-interface', 'children'),
-                      'old-guesses':Output('old-guesses', 'children')},
+                      'old-guesses':Output('old-guesses', 'children'),
+                      },
               inputs={'n_clicks':Input('button-update', 'n_clicks'),
                       'reset':Input('button-reset', 'n_clicks'),
-                      'guess1':State('input-1', 'value'),
-                      'guess2':State('input-2', 'value'),
-                      'guess3':State('input-3', 'value'),
-                      'guess4':State('input-4', 'value'),
-                      'guess5':State('input-5', 'value'),
-                      'result_1':State('dd-1', 'value'),
-                      'result_2':State('dd-2', 'value'),
-                      'result_3':State('dd-3', 'value'),
-                      'result_4':State('dd-4', 'value'),
-                      'result_5':State('dd-5', 'value'),
+                      'guesses':(State('input-1', 'value'),
+                                 State('input-2', 'value'),
+                                 State('input-3', 'value'),
+                                 State('input-4', 'value'),
+                                 State('input-5', 'value'),),
+                      'results':(State('dd-1', 'value'),
+                                 State('dd-2', 'value'),
+                                 State('dd-3', 'value'),
+                                 State('dd-4', 'value'),
+                                 State('dd-5', 'value'),),
                       })
+
 def callback_guess(n_clicks, reset,
-                   guess1, guess2, guess3, guess4, guess5,
-                   result_1, result_2, result_3, result_4, result_5):
+                   guesses, results,):
     
-    # each guess & result is an input box or dropdown
-    # compile them to lists to make life easier when iterating
-    guesses = [guess1, guess2, guess3, guess4, guess5]
-    results = [result_1, result_2, result_3, result_4, result_5]
- 
     # iterate through each result & update wonky accordingly
     # either a HIT, MISS or NEAR
     for i, v in enumerate(results):
@@ -176,23 +246,25 @@ def callback_guess(n_clicks, reset,
             # solved is a dict with keys == solved number
             # so bring in the index (+1) and the letter
             wonky.solved[i+1] = g
-            wonky.guess_matrix.append((g, 'seagreen'))
         
         elif v == 'MISS':
             # now know to exlude this letter
             wonky.exclude.append(g)
-            wonky.guess_matrix.append((g, 'sienna'))
         
         else:
             # now know letter is in the word, just wrong location
             wonky.known.append(g)
-            wonky.guess_matrix.append((g, 'seashell'))
             
-    # Need to do some tidying up
-    # Guess engine will get upset if a solved letter is still in known
-    # we also want to remove duplicates
-    wonky.update_known()
-    wonky.exclude = list(set(wonky.exclude))
+    if n_clicks > 0:
+        
+        # zip the guesses & results to a list and append to wonky class
+        zippy = list(zip(guesses, results))
+        wonky.guess_matrix.append(zippy)
+            
+        # Need to do some tidying up
+        # we also want to remove duplicates
+        wonky.update_known()
+        wonky.exclude = list(set(wonky.exclude))
     
     # Run Guess Update
     # Produce list of best words
@@ -203,7 +275,7 @@ def callback_guess(n_clicks, reset,
             'words':words, 
             'excluded':wonky.exclude,
             'known':wonky.known,
-            'old-guesses': card_guess_matrix(wonky),
+            'old-guesses': card_old_guesses(wonky),
             }
 
 # %% RUN DASH APP

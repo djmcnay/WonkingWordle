@@ -36,9 +36,8 @@ class Wonky(object):
         self.solved = {}     # dict of form {1:'A', 5:'X'} where No are posns 
         self.known = []      # list of letters
         
-        # Guess Matrix
-        # Only really used for the App to store old guesses with colours
-        self.guess_matrix = []
+        # Guess Matrix, for storing old guesses
+        self.guess_matrix = {}
         
         return
     
@@ -57,41 +56,155 @@ class Wonky(object):
         
         self.known = list(set(self.known))
         
-        for l in self.solved.values():
-            if l in self.known:
-                self.known.remove(l)
-        
         return
+    
+    def guess_update(self, guess, result):
+        """ Update Class Things Based on a Word & Result List 
+        
+        INPUTS:
+            guess - either a string of 5-letters or list of 5-letters
+            results - list with either "HIT", "MISS" or "NEAR"
+        
+        """
+        
+        # minor error handling on guess
+        # we want a list of 5-letters ['F','A','R', 'T', 'S']
+        # also want to limit to 5 letters & have as uppercase
+        try:
+            guess = [guess] if isinstance(guess, str) else guess
+            guess = [char for char in guess[0]] if len(guess) == 1 else guess
+            guess = [guess[i].upper() for i in range(wonky.n)]
+        except:
+            raise "Error: Guess input doesn't appear to be a 5 letter word"
+            
+        # error handling for teh results matrix
+        # need to make sure results have exactly 5 values
+        # they must each be either HIT, MISS or NEAR
+        if len(result) != self.n:
+            raise "Error: Results list doen't contain 5-values"
+        for r in result:
+            if r not in ["HIT", "MISS", "NEAR"]:
+                raise "Error: Result contains value != HIT/MISS/NEAR"
+        
+        # iterate over each letter of a ziped list
+        # means v will be of the form [("A", "MISS")]
+        for i, v in enumerate(list(zip(guess, result)), 1):
+            
+            letter, letter_result = v    # unpack for readability
+            
+            # Results can either be "HIT", "MISS" or "NEAR"
+            if letter_result == "HIT":
+                
+                self.solved[i] = letter
+                
+                # Need to be very careful here!
+                # If a letter is solved we need to check if it was known
+                # In which case we should remove it, BUT it could be a double
+                # So we must only remove ONE instance from the known list
+                # Note as we iterate in this loop we APPEND
+                if letter in self.known:
+                    self.known.remove(letter)
+                
+            elif letter_result == "NEAR":
+                
+                # important we append, even if it is already in the list
+                # metters for the case where there is a double letter i.e BOOTS
+                # we previously knew of O now we tried BOTLO (not a real word)
+                # need to be able to solve one & maintain known for 2nd
+                # we can remove excess letters later
+                self.known.append(letter)
+            
+            elif letter_result == "MISS":
+                self.exclude.append(letter)
+            else:
+                continue
+                
+        # store previous guesses to the guess matrix
+        # use the current guess number as the key
+        n = len(self.guess_matrix) + 1
+        self.guess_matrix[n] = dict(guess=guess, result=result)
+        
+        # Tidy up prior info
+        self.exclude = list(set(sorted(self.exclude)))
+        self.known = list(set(sorted(self.known)))
+        
+        return guess
 
     def guess_list(self):
-        """ Filters Corpus Based on Rules """
+        """ Filters Corpus Based on Rules 
         
-        # # convert corpus to df where each letter is a col
-        # # by iterating over each entry and split to chars
-        # # df now becomes our primary dataframe
-        # df = []
-        # for word in self.corpus:
-        #     # just on the off chance a non-string has slipped in
-        #     if isinstance(word, str):
-        #         df.append([i for i in word])
-        # df = pd.DataFrame(df, columns=range(1, 6))
-        df = self.corpus.copy()
+        
+        """
+        
+        df = self.corpus.copy()    # pull in corpus from self
         
         # filter out words whre we know letters to exclude
         if len(self.exclude) > 0:
             exclude = [i.upper() for i in self.exclude]
             df = df[~df.isin(exclude).any(axis=1)]
         
-        # filter for known letters with positions
+        # filter for known solved letters (positions & locations)
         if not len(self.solved.keys()) == 0:
+        
             for k, v in self.solved.items():
-                df = df[df.loc[:, k] == v.upper()]
+                df = df[df.loc[:, int(k)] == v.upper()]
                 
         # filter where letter is know but position not so
-        ignore = list(self.solved.keys())
-        x = df.loc[:, ~df.columns.isin(ignore)].copy()
+        # we copy df but remove solved columns, then filter for known letters
+        # use the index of our filtered copied cersion on original df
+        # otherwise the final df will forget the solved letters
+        idx = ~df.columns.isin(list(self.solved.keys()))    # index solved cols
+        x = df.loc[:, idx].copy()    
+        
+        # filter through each known letter
         for l in self.known:
             x = x[x.isin([l.upper()]).any(axis=1)]
-        df = df.loc[x.index, :]
+        
+        df = df.loc[x.index, :]   # use index of filtered on original df
         
         return df
+    
+    
+# %%
+
+# wonky = Wonky()
+
+# g = ("ABOUT", ["MISS", "NEAR", "HIT", "MISS", "NEAR"])
+# wonky.guess_update(*g)
+# x = wonky.guess_list()
+# print(x.head())
+
+# #wonky.guess_update("every", ["MISS", "MISS", "MISS", "MISS", "MISS"])
+# #x = wonky.guess_list()
+# #print(x.head())
+
+# #wonky.guess_update("spill", ["HIT", "MISS", "HIT", "HIT", "HIT"])
+# #x = wonky.guess_list()
+# #print(x.head())
+
+
+# # %% Build a complicated WORDLE
+
+# # TARGET WORD: BOOTS
+
+# # GUESSES
+# #   ("ABOUT", ["MISS", "NEAR", "HIT", "MISS", "NEAR"])
+# #   (")
+
+# x = ['a', 'b', 'c', 'a']
+# x.remove(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
