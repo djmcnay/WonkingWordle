@@ -51,10 +51,16 @@ class Wonky(object):
         
         return df
         
-    def update_known(self):
-        """ Cleans Known List by Removing Solved Letters """
+    def reset(self):
+        """ Resets Game to Start Again """
         
-        self.known = list(set(self.known))
+        # Guess Storage
+        self.exclude = []    # list of letters
+        self.solved = {}     # dict of form {1:'A', 5:'X'} where No are posns 
+        self.known = []      # list of letters
+        
+        # Guess Matrix, for storing old guesses
+        self.guess_matrix = {}
         
         return
     
@@ -130,7 +136,7 @@ class Wonky(object):
         
         return guess
 
-    def guess_list(self):
+    def guess_list(self, n_store=50):
         """ Filters Corpus Based on Rules 
         
         
@@ -161,6 +167,9 @@ class Wonky(object):
             x = x[x.isin([l.upper()]).any(axis=1)]
         
         df = df.loc[x.index, :]   # use index of filtered on original df
+        
+        # store the top n_store guesses to self for later use
+        self.top_guess = ["".join(df.loc[i,:]) for i in df.index[0:n_store]]
         
         return df
     
