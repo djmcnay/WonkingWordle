@@ -36,6 +36,9 @@ class Wonky(object):
         self.solved = {}     # dict of form {1:'A', 5:'X'} where No are posns 
         self.known = []      # list of letters
         
+        # dict of lists for for position or NEAR letters
+        self.partial ={1:[],2:[],3:[],4:[],5:[]}     
+        
         # Guess Matrix, for storing old guesses
         self.guess_matrix = {}
         
@@ -119,6 +122,10 @@ class Wonky(object):
                 # need to be able to solve one & maintain known for 2nd
                 # we can remove excess letters later
                 self.known.append(letter)
+                
+                # also update list of positions where we found known letters
+                # these can be excluded from this position later
+                self.partial[i].append(letter)
             
             elif letter_result == "MISS":
                 self.exclude.append(letter)
@@ -136,7 +143,7 @@ class Wonky(object):
         
         return guess
 
-    def guess_list(self, n_store=50):
+    def guess_list(self):
         """ Filters Corpus Based on Rules 
         
         
@@ -151,9 +158,17 @@ class Wonky(object):
         
         # filter for known solved letters (positions & locations)
         if not len(self.solved.keys()) == 0:
-        
             for k, v in self.solved.items():
                 df = df[df.loc[:, int(k)] == v.upper()]
+                
+        # filter for previous guesses where we know the position of NEAR
+        # these letters could still be in the word but can't be in that position
+        # partial dict is instansiated with keys 1-5 and lists as values
+        # this is because unlike solved there could be multiple misses
+        for k, v in self.partial.items():
+            if len(v) > 0:
+                for letter in v:
+                    df = df[df.loc[:, int(k)] != letter.upper()]
                 
         # filter where letter is know but position not so
         # we copy df but remove solved columns, then filter for known letters
@@ -169,7 +184,7 @@ class Wonky(object):
         df = df.loc[x.index, :]   # use index of filtered on original df
         
         # store the top n_store guesses to self for later use
-        self.top_guess = ["".join(df.loc[i,:]) for i in df.index[0:n_store]]
+        self.top_guess = ["".join(df.loc[i,:]) for i in df.index]
         
         return df
     

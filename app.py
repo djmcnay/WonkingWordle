@@ -156,7 +156,7 @@ def card_of_failure(wonky, width_px=50):
 md_question = """ This is version 1 of my attempt to optimise Wordle.
 
 ### Source Dictionaries
-This a proving a pain in the backside. Our primary source is from  
+This a proving a pain in the backside. Our primary source is from 
 [WordFrequency.info](https://www.wordfrequency.info/) who have a great data set
 which takes the billion word, Corpus of Contemporary American English (COCA) 
 and looks for word frequency, standardising by source. Unfortunately, they
@@ -174,13 +174,11 @@ Filtering for 5-letter words, that means we have about 11,000 unique words
 although some will be proper English rather than American.
 
 ### Method
-Our method for v1 is very simple and does leave some holes - notably we aren't 
-(yet) excluding the positions of known "nears" so the model may suggest, for 
-example, "ABOUT" has an A but not in position 1 but we may still get words that 
-start with A; for the moment just pay attention.
+Our method for v1 is very simple and does leave some holes.
 
-I also have a plan to create a scoring system to optimise for the best seed 
-words, but that is only if I can still be bothered (and if v1 fails to beat Ann's brain).
+Hotably we haven't optimised the seed words, 
+but that is only if I can still be bothered 
+(and if v1 fails to beat Ann's brain).
 
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/default-red.png#center)](https://www.buymeacoffee.com/panda)
 """
@@ -433,7 +431,9 @@ def callback_guess(n_clicks,
     
     # causes errors if we have run out of viable words
     
-    if len(wonky.top_guess) > 0:
+    if n_clicks == 0:
+        top_punt = "🫀🫀🫀🫀🫀"
+    elif len(wonky.top_guess) > 0:
         top_punt = [wonky.top_guess[0]]
     else:
         top_punt = [char for char in str("*****")]
@@ -477,4 +477,4 @@ app.layout=layout
 server = app.server
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
