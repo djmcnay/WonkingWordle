@@ -25,7 +25,6 @@ app = dash.Dash(__name__,
                 title='WonkingWordle',
                 )
 
-
 COLOURS = {'green':'teal',
            'amber':'purple',
            'red':'#ed1153',    # some pinky colour I found
@@ -154,7 +153,7 @@ def card_of_failure(wonky, width_px=50):
 
 # %% MARKDOWN
 
-md_question = """ 
+md_question = """  
 
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/default-red.png#center)](https://www.buymeacoffee.com/panda)
 """
@@ -448,6 +447,7 @@ def use_dd_to_update_guess(dd):
 
 # app.title='Wonking Wordle'
 app.layout=layout
+server = app.server
 
 if __name__ == '__main__':
     app.run_server(debug=True)
