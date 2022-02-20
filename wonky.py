@@ -149,16 +149,26 @@ class Wonky(object):
         
         df = self.corpus.copy()    # pull in corpus from self
         
-        # filter out words whre we know letters to exclude
-        if len(self.exclude) > 0:
-            exclude = [i.upper() for i in self.exclude]
-            df = df[~df.isin(exclude).any(axis=1)]
-        
         # filter for known solved letters (positions & locations)
         if not len(self.solved.keys()) == 0:
             for k, v in self.solved.items():
                 df = df[df.loc[:, int(k)] == v.upper()]
                 
+                
+        # filter out words whre we know letters to exclude
+        if len(self.exclude) > 0:
+            
+            # find a set of the columns which haven't been solved
+            # the set() ^ set() is a shortcut for not intersection
+            # subset corpus to only those columns (we use index later)
+            unsolved = list(set(df.columns) ^ set(self.solved.keys()))
+            x = df.loc[:, unsolved]
+            
+            exclude = [i.upper() for i in self.exclude]
+            x = x[~x.isin(exclude).any(axis=1)]
+            df = df.loc[x.index, :]   # use index of filtered on original df 
+                       
+
         # filter for previous guesses where we know the position of NEAR
         # these letters could still be in the word but can't be in that position
         # partial dict is instansiated with keys 1-5 and lists as values
@@ -176,6 +186,7 @@ class Wonky(object):
         x = df.loc[:, idx].copy()    
         
         # filter through each known letter
+        self.known
         for l in self.known:
             x = x[x.isin([l.upper()]).any(axis=1)]
         
@@ -191,44 +202,14 @@ class Wonky(object):
 
 # wonky = Wonky()
 
-# g = ("ABOUT", ["MISS", "NEAR", "HIT", "MISS", "NEAR"])
-# wonky.guess_update(*g)
+# # CAGED
+
+# g1 = "COULD"
+# wonky.guess_update([c for c in g1], ["HIT", "MISS", "MISS", "MISS", "HIT"])
 # x = wonky.guess_list()
-# print(x.head())
-
-# #wonky.guess_update("every", ["MISS", "MISS", "MISS", "MISS", "MISS"])
-# #x = wonky.guess_list()
-# #print(x.head())
-
-# #wonky.guess_update("spill", ["HIT", "MISS", "HIT", "HIT", "HIT"])
-# #x = wonky.guess_list()
-# #print(x.head())
 
 
-# # %% Build a complicated WORDLE
-
-# # TARGET WORD: BOOTS
-
-# # GUESSES
-# #   ("ABOUT", ["MISS", "NEAR", "HIT", "MISS", "NEAR"])
-# #   (")
-
-# x = ['a', 'b', 'c', 'a']
-# x.remove(0)
-
-x = ["x", "x"]
-y = "".join(x)
-
-
-
-
-
-
-
-
-
-
-
-
-
+# g2 = "CYCAD"
+# wonky.guess_update([c for c in g2], ["HIT", "MISS", "MISS", "NEAR", "HIT"])
+# y = wonky.guess_list()
 

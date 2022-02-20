@@ -454,7 +454,6 @@ def callback_guess(n_clicks,
             'modal_terminate':is_open,
             }
 
-
 @app.callback(output={'guess':(Output('input-1', 'value'),
                                Output('input-2', 'value'),
                                Output('input-3', 'value'),
@@ -468,7 +467,6 @@ def use_dd_to_update_guess(dd):
         return {'guess':[c for c in dd]}
     elif isinstance(dd, list):
         return {'guess':[c for c in dd[0]]}
-
 
 # %% RUN DASH APP
 
