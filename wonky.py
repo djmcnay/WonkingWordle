@@ -203,6 +203,8 @@ class Wonky(object):
 # x = ['a', 'b', 'c', 'a']
 # x.remove(0)
 
+x = ["x", "x"]
+y = "".join(x)
 
 
 
