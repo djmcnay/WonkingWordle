@@ -32,12 +32,7 @@ class Wonky(object):
         self.corpus = self._set_corpus_to_df(self.full)
 
         # Guess Storage
-        self.exclude = []    # list of letters
-        self.solved = {}     # dict of form {1:'A', 5:'X'} where No are posns 
-        self.known = []      # list of letters
-        
-        # dict of lists for for position or NEAR letters
-        self.partial ={1:[],2:[],3:[],4:[],5:[]}     
+        self.reset()
         
         # Guess Matrix, for storing old guesses
         self.guess_matrix = {}
@@ -64,6 +59,9 @@ class Wonky(object):
         
         # Guess Matrix, for storing old guesses
         self.guess_matrix = {}
+        
+        # dict of lists for for position or NEAR letters
+        self.partial ={1:[],2:[],3:[],4:[],5:[]}
         
         return
     
