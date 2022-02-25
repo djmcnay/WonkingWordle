@@ -29,7 +29,7 @@ class Wonky(object):
         self.n = 5    # assumed size of Wordle puzzle
         
         # convert full model to df with 1 col per letter
-        self.corpus = self._set_corpus_to_df(self.full)
+        self._set_corpus_to_df(self.full)
 
         # Guess Storage
         self.reset()
@@ -46,8 +46,9 @@ class Wonky(object):
         for word in word_series:
             df.append([i for i in word])
         df = pd.DataFrame(df, columns=range(1, 6))
+        self.corpus = df
         
-        return df
+        return
         
     def reset(self):
         """ Resets Game to Start Again """
@@ -186,9 +187,9 @@ class Wonky(object):
         x = df.loc[:, idx].copy()    
         
         # filter through each known letter
-        self.known
-        for l in self.known:
-            x = x[x.isin([l.upper()]).any(axis=1)]
+        # self.known
+        # for l in self.known:
+        #     x = x[x.isin([l.upper()]).any(axis=1)]
         
         df = df.loc[x.index, :]   # use index of filtered on original df
         
@@ -197,19 +198,3 @@ class Wonky(object):
         
         return df
     
-    
-# %%
-
-# wonky = Wonky()
-
-# # CAGED
-
-# g1 = "COULD"
-# wonky.guess_update([c for c in g1], ["HIT", "MISS", "MISS", "MISS", "HIT"])
-# x = wonky.guess_list()
-
-
-# g2 = "CYCAD"
-# wonky.guess_update([c for c in g2], ["HIT", "MISS", "MISS", "NEAR", "HIT"])
-# y = wonky.guess_list()
-
