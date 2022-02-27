@@ -192,7 +192,7 @@ class Wonky(object):
         if len(self.known) > 0:
             
             # subset df removing solved letters
-            x = df.loc[:, ~x.columns.isin(self.solved.keys())].copy()
+            x = df.loc[:, ~df.columns.isin(self.solved.keys())].copy()
             
             def _f(x): 
                 """ Rtn True|False idx based on if known letters in Rows """
@@ -201,8 +201,8 @@ class Wonky(object):
                 else:
                     return False
             
-            idx = x.apply(_f, axis=1)    # get Bool index of words with NEAR in
-            df = df.loc[idx, :]          # subset potential words list
+            idx = x.apply(_f, axis=1) != False    # get Bool index of words with NEAR in
+            df = df.loc[idx, :]                   #  subset potential words list
         
         # store the top n_store guesses to self for later use
         self.top_guess = ["".join(df.loc[i,:]) for i in df.index]
