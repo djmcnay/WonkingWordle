@@ -169,7 +169,6 @@ class Wonky(object):
             x = x[~x.isin(exclude).any(axis=1)]
             df = df.loc[x.index, :]   # use index of filtered on original df 
                        
-
         # filter for previous guesses where we know the position of NEAR
         # these letters could still be in the word but can't be in that position
         # partial dict is instansiated with keys 1-5 and lists as values
@@ -185,16 +184,27 @@ class Wonky(object):
         # otherwise the final df will forget the solved letters
         idx = ~df.columns.isin(list(self.solved.keys()))    # index solved cols
         x = df.loc[:, idx].copy()    
-        
-        # filter through each known letter
-        # self.known
-        # for l in self.known:
-        #     x = x[x.isin([l.upper()]).any(axis=1)]
-        
         df = df.loc[x.index, :]   # use index of filtered on original df
+        
+        
+        # up to here, with partial we are filtering by columnn
+        # now we filter for ROWS to ensure NEAR letters are in the row
+        if len(self.known) > 0:
+            
+            # subset df removing solved letters
+            x = df.loc[:, ~x.columns.isin(self.solved.keys())].copy()
+            
+            def _f(x): 
+                """ Rtn True|False idx based on if known letters in Rows """
+                if len(x[x.isin(self.known)]) > 0:
+                    return True 
+                else:
+                    return False
+            
+            idx = x.apply(_f, axis=1)    # get Bool index of words with NEAR in
+            df = df.loc[idx, :]          # subset potential words list
         
         # store the top n_store guesses to self for later use
         self.top_guess = ["".join(df.loc[i,:]) for i in df.index]
         
         return df
-    

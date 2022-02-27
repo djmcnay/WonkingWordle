@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 20 20:26:34 2022
-
-@author: djmcnay
+STILL A PLAYGROUND... DOESN't WORK PROPERLY
 """
 
 import pandas as pd
@@ -12,7 +10,7 @@ from wonky import Wonky
 from tqdm import tqdm
 
 wonky = Wonky()
-wonky._set_corpus_to_df(wonky.freq)
+#wonky._set_corpus_to_df(wonky.freq)
 
 def test(guess, target):
     
@@ -31,6 +29,18 @@ def test(guess, target):
             result.append("MISS")
     
     return result
+
+# guess = "ABOUT"
+# result = test(guess, "VIVID")
+# wonky.guess_update(guess, result)        # update wonky guess updater
+# x = wonky.guess_list()                   # update guess list
+
+# guess = "EVERY"
+# result = test(guess, "VIVID")
+# print(result)
+# wonky.guess_update(guess, result)        # update wonky guess updater
+# x = wonky.guess_list()                   # update guess list
+# print(x)
 
 def solve(wonky=wonky, seed="ABOUT", target="ABOUT"):
     
@@ -53,6 +63,7 @@ def solve(wonky=wonky, seed="ABOUT", target="ABOUT"):
         
     wonky.reset()
     return n ** 2
+
 
 def model(wonky):
     
@@ -96,4 +107,5 @@ def kingkong(wonky, n=100):
     
     return
 
-x = kingkong(wonky)
+#x = kingkong(wonky)
+
