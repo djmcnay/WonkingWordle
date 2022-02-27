@@ -70,14 +70,14 @@ For devices larger than 400px */
 @media (min-width: 400px) {
   .container {
     width: 95%;
-    max-width: 500px;
+    /* max-width: 500px;*/
     padding: 0;}
 
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   .container {
     width: 95%; 
-    max-width: 500px;
+    /* max-width: 500px;*/
     padding: 0;}
   .column,
   .columns {
